@@ -32,7 +32,8 @@ fun CityListScreen(
     cities: List<City>,
     onAddCity: (City) -> Unit,
     onUpdateCity: (City, City) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onDeleteCity: (City) -> Unit
 ) {
     var newCityName by remember { mutableStateOf("") }
     var newProvinceName by remember { mutableStateOf("") }
@@ -105,6 +106,8 @@ fun CityListScreen(
             }
         }
         if (selectedCity != null) {
+            val isUnchanged = editedCityName == selectedCity?.name && editedProvinceName == selectedCity?.province
+            val buttonText = if (isUnchanged) "DELETE CITY" else "UPDATE CITY"
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -124,6 +127,7 @@ fun CityListScreen(
                     onValueChange = { editedProvinceName = it },
                     label = { Text("Updated Province") },
                     modifier = Modifier.weight(1f)
+
                 )
 
                 Spacer(modifier = Modifier.width(8.dp))
@@ -132,7 +136,13 @@ fun CityListScreen(
                     modifier = Modifier.padding(vertical = 12.dp),
                     onClick = {
                         val cityToUpdate = selectedCity
-                        if (
+                        if (isUnchanged) {
+                            onDeleteCity(cityToUpdate!!)
+                            selectedCity = null
+                            editedCityName = ""
+                            editedProvinceName = ""
+                        }
+                        else if (
                             cityToUpdate != null &&
                             editedCityName.isNotBlank() &&
                             editedProvinceName.isNotBlank()
@@ -151,7 +161,7 @@ fun CityListScreen(
                         }
                     }
                 ) {
-                    Text("UPDATE CITY")
+                    Text(buttonText)
                 }
             }
         }
@@ -213,7 +223,8 @@ fun CityListScreenPreview() {
                 City("Calgary", "AB")
             ),
             onAddCity = {},
-            onUpdateCity = { _, _ -> }
+            onUpdateCity = { _, _ -> },
+            onDeleteCity = {}
         )
     }
 }
